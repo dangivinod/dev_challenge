@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-import originalImage from "./images/ny_original.jpg"
 import styles from "./puzzle.module.css"
 import Image from "next/image"
 
@@ -9,7 +8,7 @@ function Puzzle() {
     shuffled: [],
     solved: [],
   })
-  const [dragItem, setDragItem] = useState("")
+  const [dragItem, setDragItem] = useState({})
 
   useEffect(() => {
     const pieces = [...Array(40)].map((_, i) => ({
@@ -35,37 +34,21 @@ function Puzzle() {
     return shuffled
   }
 
-  function handleDragStart(e, order) {
+  function handleDragStart(e, order, index) {
     e.dataTransfer.setData("text/plain", order)
-    setDragItem(order)
+    setDragItem({ index: index, order })
   }
 
-  function handleDrop(e, index, targetName) {
+  function handleDrop(e, order, index) {
     e.preventDefault()
-    let target = puzzleState[targetName]
+    let target = puzzleState["shuffled"]
 
-    const pieceOrder = e.dataTransfer.getData("text")
+    const dragItems = target.find((p) => p.order === dragItem?.order)
+    const dropItems = target.find((p) => p.order === order)
+    target[index] = dragItems
+    target[dragItem?.index] = dropItems
 
-    const pieceData = target.find((p) => p.order === dragItem)
-    const origin = puzzleState[pieceData.board]
-
-    const lastData = target.find((p) => p.order === index)
-    // console.log("lastData - ", lastData)
-
-    // if (targetName === pieceData.board) target = origin
-    // origin[origin.indexOf(pieceData)] = undefined
-    // target[index] = pieceData
-    // target[dragItem] = lastData
-    // pieceData.board = targetName
-
-    const updateData = target.map((item) =>
-      item.order === index ? pieceData : item
-    )
-    const updateData2 = updateData.map((item) =>
-      item.order === dragItem ? lastData : item
-    )
-
-    setPuzzleState({ ...puzzleState, [targetName]: updateData2 })
+    setPuzzleState({ ...puzzleState, shuffled: target })
   }
 
   function renderPieceContainer(piece, index, boardName) {
@@ -75,8 +58,8 @@ function Puzzle() {
           <Image
             draggable
             onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => handleDrop(e, piece.order, boardName)}
-            onDragStart={(e) => handleDragStart(e, piece.order)}
+            onDrop={(e) => handleDrop(e, piece.order, index)}
+            onDragStart={(e) => handleDragStart(e, piece.order, index)}
             src={require(`./images/${piece.img}`)}
             alt="test"
           />
@@ -85,7 +68,6 @@ function Puzzle() {
     )
   }
 
-  // console.log("puzzleState---- ", puzzleState)
   return (
     <div className={styles.puzzle}>
       <ul className={styles.puzzle__shuffled_board}>
