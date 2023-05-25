@@ -9,6 +9,7 @@ function Puzzle() {
     solved: [],
   })
   const [dragItem, setDragItem] = useState({})
+  const [showOriginal, setShowOriginal] = useState(false)
 
   useEffect(() => {
     const pieces = [...Array(40)].map((_, i) => ({
@@ -53,29 +54,42 @@ function Puzzle() {
 
   function renderPieceContainer(piece, index, boardName) {
     return (
-      <li key={index} id={piece.order}>
-        {piece && (
-          <Image
-            draggable
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => handleDrop(e, piece.order, index)}
-            onDragStart={(e) => handleDragStart(e, piece.order, index)}
-            src={require(`./images/${piece.img}`)}
-            alt="test"
-          />
-        )}
-      </li>
+      <>
+        <li key={index} id={piece.order}>
+          {piece && (
+            <Image
+              draggable
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => handleDrop(e, piece.order, index)}
+              onDragStart={(e) => handleDragStart(e, piece.order, index)}
+              src={require(`./images/${piece.img}`)}
+              alt="img"
+            />
+          )}
+        </li>
+      </>
     )
   }
 
+  function handleShowOriginal() {
+    setShowOriginal(!showOriginal)
+  }
+
   return (
-    <div className={styles.puzzle}>
-      <ul className={styles.puzzle__shuffled_board}>
-        {puzzleState.shuffled.map((piece, i) =>
-          renderPieceContainer(piece, i, "shuffled")
+    <>
+      <button onClick={handleShowOriginal}>Original Image</button>
+      <div className={styles.puzzle}>
+        {showOriginal ? (
+          <Image src={require(`./images/ny_original.jpg`)} alt="original" />
+        ) : (
+          <ul className={styles.puzzle__shuffled_board}>
+            {puzzleState.shuffled.map((piece, i) =>
+              renderPieceContainer(piece, i, "shuffled")
+            )}
+          </ul>
         )}
-      </ul>
-    </div>
+      </div>
+    </>
   )
 }
 
